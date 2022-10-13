@@ -1,16 +1,14 @@
 const router = require("express").Router();
-const Patient = require("../models/Patient");
-const axios = require("axios");
-var generator = require("generate-password");
+const Doctor = require("../models/Doctor");
 
 router.post("/login", async (req, res) => {
   try {
-    const patient = await Patient.findOne({ email: req.body.email });
-    if (patient.age === null) {
+    const doctor = await Doctor.findOne({ email: req.body.email });
+    if (doctor.age === null) {
       return res.status(400).send("Email not found, please register");
     }
-    if (patient.otp === req.body.otp) {
-      return res.status(200).send(patient);
+    if (doctor.otp === req.body.otp) {
+      return res.status(200).send(doctor);
     } else {
       return res.status(400).json({ status: 1, mssg: "Incorrect OTP" });
     }
@@ -25,15 +23,15 @@ router.post("/sendloginotp", async (req, res) => {
     numbers: true,
   });
   try {
-    let patient = await Patient.findOne({ email: req.body.email });
-    if (!patient) {
-      patient = new Patient({
+    let doctor = await Doctor.findOne({ email: req.body.email });
+    if (!doctor) {
+      doctor = new Doctor({
         email: req.body.email,
         otp,
       });
     }
-    patient.otp = otp;
-    await patient.save();
+    doctor.otp = otp;
+    await doctor.save();
     await axios.post("/sendmail", {
       email: req.body.email,
       subject: "OTP for login",
@@ -46,17 +44,18 @@ router.post("/sendloginotp", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  let patient = await Patient.findOne({ email: req.body.email });
+  let doctor = await Doctor.findOne({ email: req.body.email });
   if (emailExist.age !== null) {
     return res.status(400).send("Email already exists");
   }
-  if (req.body.otp !== patient.otp) {
-    await Patient.findByIdAndDelete(patient._id);
+  if (req.body.otp !== doctor.otp) {
+    await Doctor.findByIdAndDelete(doctor._id);
     res.status(500).json({ status: 1, mssg: "Incorrect OTP" });
   }
-  patient.address = req.body.address;
-  patient.age = req.body.age;
-  patient.name = req.body.name;
-  patient = await patient.save();
-  res.json(patient);
+  doctor.address = req.body.address;
+  doctor.age = req.body.age;
+  doctor.name = req.body.name;
+  doctor.category = req.body.category;
+  doctor = await doctor.save();
+  res.json(doctor);
 });

@@ -9,7 +9,6 @@ const sessionSchema = new mongoose.Schema({
   doctor_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doctor",
-    required: true,
   },
   records: [
     {
